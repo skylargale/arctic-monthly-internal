@@ -1,6 +1,6 @@
 # arctic-monthly-internal
 
-This repository holds code relevant to Gale et al., 2026 (to be submitted to JGR Atmospheres).
+This repository holds code relevant to Gale et al., 2026b (to be submitted to JGR Atmospheres).
 
 ## Setup Instructions
 
