@@ -1,6 +1,6 @@
 # arctic-monthly-internal
 
-This repository holds code relevant to Gale et al., 2026 (to be submitted).
+This repository holds code relevant to Gale et al., 2026b (to be submitted to JGR Atmospheres).
 
 ## Setup Instructions
 
@@ -12,4 +12,4 @@ This repository holds code relevant to Gale et al., 2026 (to be submitted).
 
 ## Data
 
-The processed data that is used in these notebooks is located in...
+The processed data that is used in these notebooks is located in [Zenodo](https://doi.org/10.5281/zenodo.18842089).
