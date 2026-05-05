@@ -13,3 +13,9 @@ This repository holds code relevant to Gale et al., 2026b (to be submitted to JG
 ## Data
 
 The processed data that is used in these notebooks is located in [Zenodo](https://doi.org/10.5281/zenodo.18842089).
+
+## Citation
+
+If you use this code, please cite:
+
+Gale, S. (2026). *arctic-monthly-internal* (Version 1.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.20040165
