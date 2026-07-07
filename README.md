@@ -3,76 +3,45 @@
 Code accompanying [Gale et al. (2026b)](https://essopenarchive.org/doi/full/10.22541/essoar.15002817/v1) (preprint).
 
 ## Repository Structure
+
+```
 arctic-monthly-internal/
 ├── README.md
-
 ├── LICENSE
-
 ├── figure_utils.py              # Shared utilities: data loaders, plot helpers, statistics
-
 │
-
 ├── 1_download/                  # Data acquisition
-
 │   ├── download_era5.ipynb
-
 │   ├── download_era5_OG.ipynb
-
 │   ├── download_CMIP6_hist.ipynb
-
 │   ├── download_CMIP6_ssp370.ipynb
-
 │   ├── download_CMIP6_ssp585.ipynb
-
 │   ├── google_archive_download.ipynb
-
 │   ├── cesm2_and_smbb_download.ipynb
-
 │   └── e3smv2_download.ipynb
-
 │
-
 ├── 2_preprocess/                # Data organization and trend computation
-
 │   ├── organize_cmip6_data.ipynb
-
 │   └── calculate_all_trends.ipynb
-
 │
-
 ├── 3_methods/                   # CNN, ML-PLS, and dynamical adjustment
-
 │   ├── Monthly_CNN_7090.ipynb       # Arctic CNN training and evaluation
-
 │   ├── Monthly_CNN_Global.ipynb     # Global CNN training and evaluation
-
 │   ├── Monthly_PLS_7090-explore.ipynb
-
 │   ├── Monthly_PLS_Global-explore.ipynb
-
 │   ├── My_Obs_Dyn_Adj_Monthly.ipynb
-
 │   ├── CNN_PLS_MMM_Uncertainty.ipynb
-
 │   └── save_plot_rmse.ipynb
-
 │
-
 ├── 4_nudged/                    # PInudge wind-nudging analysis
-
 │   └── Nudged_Data.ipynb
-
 │
-
 ├── 5_vertical/                  # Vertical temperature and wind trend analysis
-
 │   └── MMM_Vert_Trends.ipynb
-
 │
-
 └── 6_figures/                   # Figure generation
-
-└── make_figures.ipynb
+    └── make_figures.ipynb
+```
 
 ## Reproducing the Analysis
 
