@@ -1,0 +1,19 @@
+name: arctic-monthly-internal
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - xarray
+  - netcdf4          # xarray backend for reading .nc files
+  - matplotlib
+  - scipy
+  - scikit-learn
+  - tensorflow        # imported in Monthly_PLS_7090.ipynb / Monthly_PLS_Global.ipynb
+  - cartopy
+  - xesmf
+  - gcsfs             # Google Cloud CMIP6 archive access
+  - cdsapi            # Copernicus / ERA5 download
+  - requests
+  - pip
