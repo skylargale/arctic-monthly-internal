@@ -1,0 +1,74 @@
+Month: march
+Geometry: none
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1783902065.561184   67816 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1783902065.597126   67816 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1783902070.540312   67816 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+/glade/work/skygale/conda-envs/env_cnn/lib/python3.11/site-packages/xarray/backends/plugins.py:109: RuntimeWarning: Engine 'rasterio' loading failed:
+No module named 'rasterio'
+  external_backend_entrypoints = backends_dict_from_pkg(entrypoints_unique)
+Running month = march
+Geometry weighting = None
+Region: Arctic 
+Month: March 
+Geometry weighting: None
+Observed March mean: 0.797 K/dec
+
+
+1 (21, 22, 12, 28, 144, 2) E3SM-2-0
+2 (25, 22, 12, 28, 144, 2) CanESM5
+3 (50, 22, 12, 28, 144, 2) MIROC6
+4 (10, 22, 12, 28, 144, 2) MPI-ESM1-2-LR
+5 (11, 22, 12, 28, 144, 2) IPSL-CM6A-LR
+6 (25, 22, 12, 28, 144, 2) ACCESS-ESM1-5
+7 (50, 22, 12, 28, 144, 2) CESM2
+8 (50, 22, 12, 28, 144, 2) CESM2_SMBB
+
+
+1 (21, 22, 12, 3) E3SM-2-0
+2 (25, 22, 12, 3) CanESM5
+3 (50, 22, 12, 3) MIROC6
+4 (10, 22, 12, 3) MPI-ESM1-2-LR
+5 (11, 22, 12, 3) IPSL-CM6A-LR
+6 (25, 22, 12, 3) ACCESS-ESM1-5
+7 (50, 22, 12, 3) CESM2
+8 (50, 22, 12, 3) CESM2_SMBB
+
+==> E3SM not included in training data.
+
+
+1 (25, 22, 12, 28, 144, 2) CanESM5
+2 (50, 22, 12, 28, 144, 2) MIROC6
+3 (10, 22, 12, 28, 144, 2) MPI-ESM1-2-LR
+4 (11, 22, 12, 28, 144, 2) IPSL-CM6A-LR
+5 (25, 22, 12, 28, 144, 2) ACCESS-ESM1-5
+6 (50, 22, 12, 28, 144, 2) CESM2
+7 (50, 22, 12, 28, 144, 2) CESM2_SMBB
+
+
+1 (25, 22, 12, 3) CanESM5
+2 (50, 22, 12, 3) MIROC6
+3 (10, 22, 12, 3) MPI-ESM1-2-LR
+4 (11, 22, 12, 3) IPSL-CM6A-LR
+5 (25, 22, 12, 3) ACCESS-ESM1-5
+6 (50, 22, 12, 3) CESM2
+7 (50, 22, 12, 3) CESM2_SMBB
+
+Done!
+Cross Validation: E3SM-2-0
+Cross Validation: CanESM5
+Cross Validation: MIROC6
+Cross Validation: MPI-ESM1-2-LR
+Cross Validation: IPSL-CM6A-LR
+Cross Validation: ACCESS-ESM1-5
+Cross Validation: CESM2
+Cross Validation: CESM2_SMBB
+Done!
+Sigma_obs: 0.030034933
+Sigma_CNN: 0.2081605
+Sigma_obs: 0.041255508
+Sigma_CNN: 0.20024312
+Sigma_obs: 0.055276915
+Sigma_CNN: 0.038246196
