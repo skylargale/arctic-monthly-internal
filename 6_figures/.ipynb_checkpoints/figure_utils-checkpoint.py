@@ -40,7 +40,7 @@ SLP_LEVELS = np.linspace(-4, 4, 17)
 VERT_LEVELS = np.linspace(-2, 2, 20)
 U_LEVELS = np.linspace(-1, 1, 20)
 
-# Font sizes — change here to apply everywhere
+# Font sizes
 FS_TITLE = 16   # panel title / label
 FS_LABEL = 14   # axis label / colorbar label
 FS_TICK = 12   # tick labels
@@ -94,7 +94,9 @@ def spatial_average(array, lats):
 
 
 def regional_average(array, lats, lons, lat_min, lat_max, lon_min, lon_max):
-    """Cosine-weighted area mean over a rectangular region. array: (..., lat, lon)."""
+    """
+    Cosine-weighted area mean over a rectangular region. array: (..., lat, lon).
+    """
     lat_idx = (lats >= lat_min) & (lats <= lat_max)
     lon_idx = (lons >= lon_min) & (lons <= lon_max)
     sub = array[..., lat_idx, :][..., lon_idx]
@@ -127,7 +129,7 @@ def significance_mask(timeseries, alpha=0.05):
     Tests whether the linear trend at each grid point is statistically
     significant, adjusting the effective sample size for lag-1
     autocorrelation in the detrended residuals. Returns a boolean mask
-    marking grid points where the trend is NOT significant.
+    marking grid points where the trend is significant.
 
     Parameters
     ----------
@@ -187,8 +189,8 @@ def significance_mask(timeseries, alpha=0.05):
 def weighted_corrcoef_pvalue(x, y, lats):
     """
     Area-weighted Pearson correlation with p-value.
-    Effective N accounts for spatial autocorrelation following
-    Bretherton et al. (1999).
+    Effective N accounts for spatial autocorrelation
+    following Bretherton et al. (1999).
     """
     r = weighted_corrcoef(x, y, lats)
 
@@ -242,14 +244,18 @@ def mahalanobis_pvalue(x_samp, y_samp, obs_x, obs_y):
 # ============================================================
 
 def polar_ax(ax, extent=(-180, 180, 54, 90)):
-    """Standard polar stereographic formatting."""
+    """
+    Standard polar stereographic formatting.
+    """
     ax.coastlines(resolution='110m')
     ax.set_boundary(circle_path, transform=ax.transAxes)
     ax.set_extent(list(extent), crs=ccrs.PlateCarree())
 
 
 def plot_region(ax, lon_min, lon_max, lat_min, lat_max, n_points=100, **kwargs):
-    """Draw a rectangular region outline on a polar stereographic axis."""
+    """
+    Draw a rectangular region outline on a polar stereographic axis.
+    """
     lons = np.concatenate([
         np.linspace(lon_min, lon_max, n_points), lon_max * np.ones(n_points),
         np.linspace(lon_max, lon_min, n_points), lon_min * np.ones(n_points)
@@ -261,17 +267,15 @@ def plot_region(ax, lon_min, lon_max, lat_min, lat_max, n_points=100, **kwargs):
     ax.plot(lons, lats, transform=ccrs.PlateCarree(), **kwargs)
 
 
-def add_stippling(ax, insig_mask, lon, lat, density=3, min_spacing_km=200, seed=0):
+def add_stippling(ax, sig_mask, lon, lat, density=3, min_spacing_km=200, seed=0):
     """
-    Overlay dots where insig_mask is True (not significant at 95%),
-    thinned so kept points are at least min_spacing_km apart.
+    Overlay dots where sig_mask is True (significant at 95%).
+    Thinned so kept points are at least min_spacing_km apart.
     """
-    nlat, nlon = insig_mask.shape
-    lon_use = lon[:nlon]
-    lat_use = lat[:nlat]
+    nlat, nlon = sig_mask.shape
+    lon_use, lat_use = lon[:nlon], lat[:nlat]
     lon2d, lat2d = np.meshgrid(lon_use, lat_use)
-    lons_flat = lon2d[insig_mask]
-    lats_flat = lat2d[insig_mask]
+    lons_flat, lats_flat = lon2d[sig_mask], lat2d[sig_mask]
     if len(lons_flat) == 0:
         return
 
@@ -292,21 +296,6 @@ def add_stippling(ax, insig_mask, lon, lat, density=3, min_spacing_km=200, seed=
         lons_flat[keep], lats_flat[keep],
         s=4, color='black', alpha=0.8,
         transform=ccrs.PlateCarree(), zorder=5, linewidths=0
-    )
-
-
-def add_stippling_cartesian(ax, sig_mask, x, y, density=5):
-    """
-    Overlay dots where insig_mask is True (significant at 95%), on a
-    plain (non-Cartopy) axis.
-    """
-    x2d, y2d = np.meshgrid(x, y)
-    mask_sub = sig_mask[::density, ::density]
-    x_sub = x2d[::density, ::density]
-    y_sub = y2d[::density, ::density]
-    ax.scatter(
-        x_sub[mask_sub], y_sub[mask_sub],
-        s=4, color='black', alpha=0.8, zorder=5, linewidths=0
     )
 
 
@@ -346,7 +335,9 @@ def bootstrap_correlation_pdf(x, y, sample_size, n_boot=10000, seed=None):
 
 
 def add_colorbar(fig, im, ax_array, label, ticks, orientation='vertical'):
-    """Standardised colorbar using universal formatting constants."""
+    """
+    Standardized colorbar using universal formatting constants.
+    """
     cbar = fig.colorbar(
         im, ax=ax_array, orientation=orientation,
         ticks=ticks, shrink=CBAR_SHRINK, aspect=CBAR_ASPECT, pad=CBAR_PAD
@@ -418,8 +409,7 @@ def load_sim_trends(sim_glob, month_slice=slice(2, 4), scale=0.213/0.260):
     return mod_sat, mod_slp, all_members_sat
 
 
-def load_nudged(nudged_glob, target_lat, target_lon,
-                time_slice=("1980-01-01", "2022-12-31"), months=(4, 5, 6)):
+def load_nudged(nudged_glob, target_lat, target_lon, time_slice=("1980-01-01", "2022-12-31"), months=(4, 5, 6)):
     """
     Load PInudge wind-nudged ensemble data, compute trends, and regrid.
 
@@ -493,7 +483,7 @@ def load_nudged(nudged_glob, target_lat, target_lon,
     nudged_sat_ts_mean = nudged_sat_ts_da.mean(dim='ensemble')
     nudged_sat_ts_rg = rg(nudged_sat_ts_mean).values
 
-    # ---- 3-D temperature (T) ----
+    # 3-D temperature (T)
     ds_t = arrays['T']   # (ens, time, lev, lat, lon)
     years_t = np.unique(ds_t['time'].dt.year)
     months_t = np.unique(ds_t['time'].dt.month)
@@ -514,9 +504,7 @@ def load_nudged(nudged_glob, target_lat, target_lon,
     nudged_t_ens = t_trends          # (ens, 3, lev, lat)
     nudged_t = nudged_t_ens.mean(axis=0)  # (3, lev, lat)
 
-    # Ensemble-mean full zonal-mean T time series (years, months, lev, lat),
-    # needed to run a significance test on the PInudge vertical structure
-    # (Figure 4) rather than only having the pre-computed trend available.
+    # Ensemble-mean full zonal-mean T time series (years, months, lev, lat)
     nudged_t_ts = df_t_zonal.mean(dim='ensemble')  # (years, months, lev, lat)
 
     return (nudged_sat, nudged_slp,
@@ -530,7 +518,9 @@ def load_nudged(nudged_glob, target_lat, target_lon,
 
 
 def load_obs_grids(sat_glob, slp_glob):
-    """Load gridded monthly obs time series for interannual analysis."""
+    """
+    Load gridded monthly obs time series for interannual analysis.
+    """
     sat_paths = glob.glob(sat_glob)
     slp_paths = glob.glob(slp_glob)
     SAT_maps = np.nanmean([xr.open_dataset(p).DATA.values for p in sat_paths], axis=0)
@@ -541,7 +531,9 @@ def load_obs_grids(sat_glob, slp_glob):
 
 
 def load_model_grids(spliced_glob, year_slice=(1980, 2022), month_slice=(2, 4)):
-    """Load gridded monthly model time series for interannual analysis."""
+    """
+    Load gridded monthly model time series for interannual analysis.
+    """
     spliced = glob.glob(spliced_glob)
     mod_sat_list, mod_slp_list = [], []
     lat = lon = None

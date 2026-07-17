@@ -299,21 +299,6 @@ def add_stippling(ax, sig_mask, lon, lat, density=3, min_spacing_km=200, seed=0)
     )
 
 
-def add_stippling_cartesian(ax, sig_mask, x, y, density=5):
-    """
-    Overlay dots where insig_mask is True (significant at 95%).
-    On a plain (non-Cartopy) axis.
-    """
-    x2d, y2d = np.meshgrid(x, y)
-    mask_sub = sig_mask[::density, ::density]
-    x_sub = x2d[::density, ::density]
-    y_sub = y2d[::density, ::density]
-    ax.scatter(
-        x_sub[mask_sub], y_sub[mask_sub],
-        s=4, color='black', alpha=0.8, zorder=5, linewidths=0
-    )
-
-
 def bootstrap_correlation_pdf(x, y, sample_size, n_boot=10000, seed=None):
     """
     Null/internal-variability distribution of the Pearson correlation
