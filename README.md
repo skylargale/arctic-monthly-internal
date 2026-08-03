@@ -85,10 +85,9 @@ Processed data and code used in this study are available on Zenodo:
 - Data: [https://doi.org/10.5281/zenodo.21285590](https://doi.org/10.5281/zenodo.21285590)
 - Code (Version 2.0): [https://doi.org/10.5281/zenodo.21230841](https://doi.org/10.5281/zenodo.21230841)
 
-**Note:** The ERA5 vertical temperature and zonal wind data (`ERA5_Vertical_Temp.nc`, `ERA5_Vertical_U.nc`; used in `5_vertical/MMM_Vert_Trends.ipynb`) are not included in the Zenodo data archive due to upload size constraints. These files are available via the NCAR GLADE Globus share linked below, and can also be regenerated using `1_download/download_era5.ipynb` with the Copernicus Climate Data Store.
+**Note:** The following folders found within `data/` exceed Zenodo's upload size limits and are not included in the Zenodo data archive: `monthly-trends/`, `PInudge/`, `spliced/`, and `training-data/`. These are available via the NCAR GLADE Globus share linked below. ERA5 source files can also be regenerated using `1_download/download_era5.ipynb` with the Copernicus Climate Data Store.
 
-Raw and training data (including the ERA5 files above) are shared via NCAR GLADE (no NCAR account required):
-- **Globus share:** [https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F](https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F)
+The full `data/` directory, including the folders above, is shared via NCAR GLADE: (no NCAR account required): [Globus Share](https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F)
 
 Raw input data are also available from their original public sources:
 - **ERA5:** [Copernicus Climate Data Store](https://cds.climate.copernicus.eu)
@@ -100,11 +99,9 @@ Raw input data are also available from their original public sources:
 
 If you use this code or data, please cite:
 
-```text
-> Gale, S. (2026a). Why April Stands Out: Monthly Impacts of Internal Variability on Arctic Amplification [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21285590
->
-> Gale, S. (2026b). arctic-monthly-internal (Version 2.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.21230841
-```
+Gale, S. (2026a). Why April Stands Out: Monthly Impacts of Internal Variability on Arctic Amplification [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21285590
+
+Gale, S. (2026b). arctic-monthly-internal (Version 2.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.21230841
 
 ## Notes
  
