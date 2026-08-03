@@ -85,9 +85,9 @@ Processed data and code used in this study are available on Zenodo:
 - Data: [https://doi.org/10.5281/zenodo.21285590](https://doi.org/10.5281/zenodo.21285590)
 - Code (Version 2.0): [https://doi.org/10.5281/zenodo.21230841](https://doi.org/10.5281/zenodo.21230841)
 
-**Note:** The following folders found within `data/` exceed Zenodo's upload size limits and are not included in the Zenodo data archive: `monthly-trends/`, `PInudge/`, `spliced/`, and `training-data/`. These are available via the NCAR GLADE Globus share linked below. ERA5 source files can also be regenerated using `1_download/download_era5.ipynb` with the Copernicus Climate Data Store.
+**Note:** The following folders found within `data/` exceed Zenodo's upload size limits and are not included in the Zenodo data archive: `monthly-trends/`, `PInudge/`, `spliced/`, and `training-data/`. These are available via the NCAR GLADE Globus share linked below. ERA5 source files can also be regenerated using `1_download/download_era5.ipynb` with the Copernicus Climate Data Store. The `PInudge/` folder contains wind-nudging simulation output produced by Gilbert et al. (2025), hosted here with permission. Please see [Gilbert et al. (2025)](https://iopscience.iop.org/article/10.1088/2752-5295/ae11cb/meta) for the original archive and citation.
 
-The full `data/` directory, including the folders above, is shared via NCAR GLADE: (no NCAR account required): [Globus Share](https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F)
+The full `data/` directory, including the folders above, is shared via NCAR GLADE (no NCAR account required): [Globus Share](https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F)
 
 Raw input data are also available from their original public sources:
 - **ERA5:** [Copernicus Climate Data Store](https://cds.climate.copernicus.eu)
