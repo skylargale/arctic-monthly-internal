@@ -1,6 +1,6 @@
 # arctic-monthly-internal
 
-Code accompanying [Gale et al. (2026b)](https://essopenarchive.org/doi/full/10.22541/essoar.15002817/v1) (preprint).
+Code accompanying [Gale et al. (2026b)](https://essopenarchive.org/doi/full/10.22541/essoar.15002817/v1) (preprint; in review).
 
 ## Repository Structure
 
@@ -69,44 +69,43 @@ The convolutional neural network used in this study is defined in `3_methods/Mon
  
 Two conda environments are provided:
  
-- **`environment-cnn.yml`** — for `3_methods/Monthly_CNN_7090.ipynb` and `3_methods/Monthly_CNN_Global.ipynb` (CNN training/evaluation). Installs NumPy, Xarray, Matplotlib, SciPy, scikit-learn, and TensorFlow.
-- **`environment-analysis.yml`** — for all other notebooks (download, preprocessing, ML-PLS, dynamical adjustment, PInudge, vertical trends, figures). Installs the above plus Cartopy, xESMF, gcsfs, cdsapi, and requests.
+- **`environment-cnn.yml`:** For `3_methods/Monthly_CNN_7090.ipynb` and `3_methods/Monthly_CNN_Global.ipynb` (CNN training/evaluation). Installs NumPy, Xarray, Matplotlib, SciPy, scikit-learn, and TensorFlow.
+- **`environment-analysis.yml`:** For all other notebooks (download, preprocessing, ML-PLS, dynamical adjustment, PInudge, vertical trends, figures). Installs the above plus Cartopy, xESMF, gcsfs, cdsapi, and requests.
+
+To install the environments, copy and paste the following in an open session terminal:
+
 ```bash
 conda env create -f environment-cnn.yml
 conda env create -f environment-analysis.yml
 ```
- 
-File paths within notebooks may need to be updated depending on local data storage locations.
 
 ## Data Availability
- 
-Processed data and a code archive are available on Zenodo:
- 
-- Code archive: [https://zenodo.org/records/21230841](https://zenodo.org/records/21230841)
-- Data archive: [https://zenodo.org/records/21285590](https://zenodo.org/records/21285590)
-**Note:** The ERA5 vertical temperature and zonal wind data (`ERA5_Vertical_Temp.nc`, `ERA5_Vertical_U.nc`; used in `5_vertical/MMM_Vert_Trends.ipynb`) are not included in the Zenodo data archive due to upload constraints. These files currently reside only on NCAR's Casper filesystem and can be regenerated using `1_download/download_era5.ipynb` with the Copernicus Climate Data Store (see below).
- 
-Raw input data are available from the following sources:
+
+Processed data and code used in this study are available on Zenodo:
+- Data: [https://doi.org/10.5281/zenodo.21285590](https://doi.org/10.5281/zenodo.21285590)
+- Code (Version 2.0): [https://doi.org/10.5281/zenodo.21230841](https://doi.org/10.5281/zenodo.21230841)
+
+**Note:** The ERA5 vertical temperature and zonal wind data (`ERA5_Vertical_Temp.nc`, `ERA5_Vertical_U.nc`; used in `5_vertical/MMM_Vert_Trends.ipynb`) are not included in the Zenodo data archive due to upload size constraints. These files are available via the NCAR GLADE Globus share linked below, and can also be regenerated using `1_download/download_era5.ipynb` with the Copernicus Climate Data Store.
+
+Raw and training data (including the ERA5 files above) are shared via NCAR GLADE (no NCAR account required):
+- **Globus share:** [https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F](https://app.globus.org/file-manager?origin_id=313510e9-f39e-45ba-8c55-8eceff415e73&origin_path=%2F)
+
+Raw input data are also available from their original public sources:
 - **ERA5:** [Copernicus Climate Data Store](https://cds.climate.copernicus.eu)
 - **CMIP6:** [Google Cloud CMIP6 archive](https://console.cloud.google.com/marketplace/details/noaa-public/cmip6) and [ESGF](https://esgf-node.llnl.gov)
 - **CESM2 and E3SMv2:** [ESGF](https://esgf-node.llnl.gov)
-- **PInudge wind-nudging simulations:** Gilbert et al. (2025)
+- **PInudge wind-nudging simulations:** See [Gilbert et al. (2025)](https://iopscience.iop.org/article/10.1088/2752-5295/ae11cb/meta)
+
+### Citation
+
+If you use this code or data, please cite:
+
+```text
+> Gale, S. (2026a). Why April Stands Out: Monthly Impacts of Internal Variability on Arctic Amplification [Dataset]. Zenodo. https://doi.org/10.5281/zenodo.21285590
+>
+> Gale, S. (2026b). arctic-monthly-internal (Version 2.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.21230841
+```
 
 ## Notes
  
 File paths within notebooks may need to be modified depending on local data storage locations.
- 
-Raw/intermediate ensemble output not archived on Zenodo (`monthly_trends`, `PInudge`, `spliced`, `training-data`) resides on NCAR's GLADE filesystem:
-- `monthly_trends`: `/glade/work/skygale/_repos/arctic-monthly-internal/data/monthly-trends/`
-- `spliced`: `/glade/work/skygale/_repos/arctic-monthly-internal/data/spliced/`
-- `PInudge`: `/glade/work/skygale/_repos/arctic-monthly-internal/data/PInudge/`
-- `training-data`: `/glade/work/skygale/_repos/arctic-monthly-internal/data/training-data/monthly/`
-These are internal NCAR HPC paths, not externally accessible.
- 
-## Citation
- 
-If you use this code, please cite:
- 
-```text
-Gale, S. (2026). arctic-monthly-internal (Version 1.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.21230841
-```
