@@ -1,4 +1,4 @@
-name: env_cnn
+name: arctic-monthly-cnn
 channels:
   - conda-forge
 dependencies:

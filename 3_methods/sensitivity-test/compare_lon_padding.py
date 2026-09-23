@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
-"""Compare geometry-weighting sensitivity runs from Monthly_CNN_7090.py.
+"""Compare periodic (W/E boundary) padding sensitivity runs from Monthly_CNN_7090.py.
 
 Loads the `.npy` outputs that Monthly_CNN_7090.py writes for a given month
-(one file per geometry mode: untagged for 'none', `_cos`, `_sqrt_cos`) and
-reports the mean predicted Sum (Internal + External) trend for the baseline
-run alongside each weighted run found, plus the difference from baseline.
+(untagged for the baseline run, `_periodic` for the co-author-suggested
+periodic-padding run) and reports the mean predicted Sum (Internal + External)
+trend for each, plus the difference from baseline.
 
-python compare_geometry.py --month april
-python compare_geometry.py --month april --weighted cos
+python compare_lon_padding.py --month april
 """
 import argparse
 import glob
@@ -32,11 +31,11 @@ component_idx = {"internal": 0, "external": 1, "sum": 2}
 
 
 def load_run(output_dir, tag):
-    """Load the obs predictions (and per-model predictions) for one geometry tag.
+    """Load the obs predictions (and per-model predictions) for one lon-padding tag.
 
-    tag is '' for the baseline (unweighted) run, or '_cos' / '_sqrt_cos' for a
-    weighted run. Returns (None, None) if the obs file for that tag doesn't
-    exist yet (e.g. the corresponding qsub job hasn't finished/run).
+    tag is '' for the baseline (zero-padded) run, or '_periodic' for the
+    periodic-padding run. Returns (None, None) if the obs file for that tag
+    doesn't exist yet (e.g. the corresponding qsub job hasn't finished/run).
 
     Per-model prediction files are discovered by globbing rather than reading
     a hardcoded model list, so this script works regardless of run order or
@@ -54,7 +53,7 @@ def load_run(output_dir, tag):
     if tag:
         pred_paths = [p for p in all_pred_paths if p.endswith(f'{tag}.npy')]
     else:
-        # Untagged (baseline) run: exclude files that belong to a *weighted* tag.
+        # Untagged (baseline) run: exclude files that belong to a *periodic* tag.
         pred_paths = [
             p for p in all_pred_paths
             if not any(p.endswith(f'{t}.npy') for t in known_tags)
@@ -73,13 +72,6 @@ def main():
         help="Month to compare (must match the --month used for the training runs).",
     )
     parser.add_argument(
-        "--weighted",
-        nargs="+",
-        choices=["cos", "sqrt_cos"],
-        default=["cos", "sqrt_cos"],
-        help="Which weighted run(s) to compare against baseline. Missing files are skipped, not errors.",
-    )
-    parser.add_argument(
         "--component",
         choices=["internal", "external", "sum"],
         default="sum",
@@ -94,36 +86,28 @@ def main():
     if not os.path.isdir(output_dir):
         raise FileNotFoundError(
             f"Output directory not found: {output_dir}\n"
-            f"Run at least the baseline job first: qsub -v MONTH={args.month},GEOMETRY=none submit_cnn_7090.sh"
+            f"Run at least the baseline job first: qsub -v MONTH={args.month},LON_PADDING=zero submit_cnn_7090.sh"
         )
 
     baseline_obs, baseline_preds = load_run(output_dir, '')
     if baseline_obs is None:
         raise FileNotFoundError(
-            f"No baseline (unweighted) run found for {args.month} in {output_dir}\n"
-            f"Run: qsub -v MONTH={args.month},GEOMETRY=none submit_cnn_7090.sh"
+            f"No baseline (zero lon-padding) run found for {args.month} in {output_dir}\n"
+            f"Run: qsub -v MONTH={args.month},LON_PADDING=zero submit_cnn_7090.sh"
         )
 
     baseline_mean = np.nanmean(baseline_obs[:, idx, :])
-    print(f'Baseline (unweighted)      {months[month_idx]} mean predicted {args.component}: {baseline_mean:.3f} K/dec')
+    print(f'Baseline (zero lon padding)   {months[month_idx]} mean predicted {args.component}: {baseline_mean:.3f} K/dec')
 
-    found_any = False
-    for mode in args.weighted:
-        tag = f'_{mode}'
-        weighted_obs, weighted_preds = load_run(output_dir, tag)
+    periodic_obs, periodic_preds = load_run(output_dir, '_periodic')
+    if periodic_obs is None:
+        print(f"\n[periodic] not found yet -- run: qsub -v MONTH={args.month},LON_PADDING=periodic submit_cnn_7090.sh")
+        return
 
-        if weighted_obs is None:
-            print(f"  [{mode}] not found yet -- run: qsub -v MONTH={args.month},GEOMETRY={mode} submit_cnn_7090.sh")
-            continue
-
-        found_any = True
-        weighted_mean = np.nanmean(weighted_obs[:, idx, :])
-        label = f'{mode}-latitude weighted'
-        print(f'{label:<27} {months[month_idx]} mean predicted {args.component}: {weighted_mean:.3f} K/dec')
-        print(f'  Difference vs baseline:  {weighted_mean - baseline_mean:+.3f} K/dec')
-
-    if not found_any:
-        print("\nNo weighted runs found yet for this month -- nothing to compare.")
+    periodic_mean = np.nanmean(periodic_obs[:, idx, :])
+    label = 'Periodic (W/E) lon padding'
+    print(f'{label:<27} {months[month_idx]} mean predicted {args.component}: {periodic_mean:.3f} K/dec')
+    print(f'  Difference vs baseline:  {periodic_mean - baseline_mean:+.3f} K/dec')
 
 
 if __name__ == "__main__":

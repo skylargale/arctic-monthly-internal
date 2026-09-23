@@ -82,12 +82,28 @@ def compute_actual_trends(obs_maps):
     return actual_trends_obs_means, obs_maps
 
 
-def create_CNN(input_shape):
-    '''Initialize CNN.'''
+def create_CNN(input_shape, lon_padding='zero'):
+    '''Initialize CNN.
+
+    lon_padding='periodic' is a sensitivity test (co-author suggestion): the lon
+    axis is circular (144 points spanning 1.25-358.75E), but Conv2D's default
+    padding='same' zero-pads the W/E edges as if they were a hard boundary. Force
+    true periodicity instead by wrapping one column from each edge onto the other
+    before the conv (144 -> 146 points, mirroring the co-author's -1.25/361.25
+    description) and using padding='valid' so the conv's output width comes back
+    to exactly 144 -- the model's overall input/output dimensions are unchanged
+    from the zero-padding baseline, only the conv's edge treatment differs.
+    '''
     inpt = layers.Input(shape=input_shape)
 
-    # Convolutional layer
-    conv = layers.Conv2D(16, (1, 3), padding='same', activation='relu')(inpt)
+    if lon_padding == 'periodic':
+        left = layers.Lambda(lambda x: x[:, :, -1:, :])(inpt)
+        right = layers.Lambda(lambda x: x[:, :, :1, :])(inpt)
+        padded = layers.Concatenate(axis=2)([left, inpt, right])
+        conv = layers.Conv2D(16, (1, 3), padding='valid', activation='relu')(padded)
+    else:
+        conv = layers.Conv2D(16, (1, 3), padding='same', activation='relu')(inpt)
+
     pool = layers.MaxPooling2D(1)(conv)
     drop = layers.Dropout(0.5)(pool)
 
@@ -136,6 +152,29 @@ def apply_geometry_weighting(X, lats, mode, has_channel=None):
     else:
         w_shape = (1,) * (X.ndim - 2) + (len(lats), 1)
     return X * w.reshape(w_shape)
+
+
+def add_north_pole_row(X, has_channel=None):
+    '''Append an interpolated North Pole row to the grid's northernmost edge.
+
+    Sensitivity test for the reviewer's concern about the hole left at the pole:
+    the input grid's last latitude ring sits at 88.75N (2.5-degree resolution),
+    leaving a 1.25-degree gap to the pole that shows up as a hole in spatial plots
+    and is implicitly treated as missing by the CNN (padding='same' in create_CNN
+    zero-pads the lon dimension, but there is simply no data at all north of
+    88.75N). Rather than leaving that edge undefined, interpolate a single pole
+    value -- the mean of the existing northernmost ring -- and broadcast it across
+    all longitudes as a new row, the same convention used to cap polar plots.
+    '''
+    if has_channel is None:
+        has_channel = SAT_SLP
+    X = np.asarray(X)
+    lon_axis = -2 if has_channel else -1
+    lat_axis = -3 if has_channel else -2
+    top_row = np.take(X, [-1], axis=lat_axis)
+    pole_value = np.nanmean(top_row, axis=lon_axis, keepdims=True)
+    pole_row = np.broadcast_to(pole_value, top_row.shape)
+    return np.concatenate([X, pole_row], axis=lat_axis)
 
 
 def prepare_data(splice_X, splice_Y, hist_X, hist_Y, cv, m):
@@ -239,6 +278,26 @@ parser.add_argument(
     help="Geometry weighting."
 )
 
+parser.add_argument(
+    "--padding",
+    choices=["none", "pole"],
+    default="none",
+    help="North Pole padding (reviewer suggestion). 'pole' interpolates a single "
+         "value from the northernmost latitude ring (88.75N) and appends it as a "
+         "90N row, instead of leaving the grid edge with a hole at the pole."
+)
+
+parser.add_argument(
+    "--lon-padding",
+    choices=["zero", "periodic"],
+    default="zero",
+    dest="lon_padding",
+    help="W/E boundary padding (co-author suggestion). 'periodic' wraps the "
+         "longitude axis (144 points, 1.25-358.75E) onto itself at the conv layer "
+         "instead of Conv2D's default zero-padding at the W/E edges. Does not "
+         "change the CNN's overall input/output dimensions."
+)
+
 args = parser.parse_args()
 
 month_lookup = {
@@ -250,18 +309,24 @@ month_lookup = {
 MONTH_IDX = month_lookup[args.month]
 
 GEOMETRY_WEIGHTING = None if args.geometry == "none" else args.geometry
+PADDING = None if args.padding == "none" else args.padding
+LON_PADDING = None if args.lon_padding == "zero" else args.lon_padding
 
 print(f"Running month = {args.month}")
 print(f"Geometry weighting = {GEOMETRY_WEIGHTING}")
+print(f"Padding = {PADDING}")
+print(f"Lon padding = {LON_PADDING}")
 
 lats_full = np.arange(-88.75, 88.751, 2.5)
 lats_arctic = lats_full[-28:]
+if PADDING == 'pole':
+    lats_arctic = np.append(lats_arctic, 90.0)
 
 print('Region:', region, '\nMonth:', months[MONTH_IDX], '\nGeometry weighting:', GEOMETRY_WEIGHTING)
 
 # Load observation data
-sat_paths = np.sort(glob.glob('../data/training-data/monthly/observations/sat/*.nc'))[::-1]
-slp_paths = glob.glob('../data/training-data/monthly/observations/slp/*')
+sat_paths = np.sort(glob.glob('../../data/training-data/monthly/observations/sat/*.nc'))[::-1]
+slp_paths = glob.glob('../../data/training-data/monthly/observations/slp/*')
 
 obs_maps = []
 for sat_path in sat_paths:
@@ -277,12 +342,16 @@ obs_maps = np.reshape(obs_maps, (4, 3, 12, 28, 144, 2))
 actual_trends_obs_means, obs_maps = compute_actual_trends(obs_maps)
 obs_maps = np.reshape(obs_maps, (12, 12, 28, 144, 2))
 
+# Sensitivity test: reviewer-suggested North Pole padding
+if PADDING == 'pole':
+    obs_maps = add_north_pole_row(obs_maps)
+
 # Sensitivity test: apply the same geometry weighting used on the model inputs
 obs_maps = apply_geometry_weighting(obs_maps, lats_arctic, GEOMETRY_WEIGHTING)
 
 # Load simulated data
-spliced_path = '../data/training-data/monthly/spliced/'
-hist_path = '../data/training-data/monthly/hist/'
+spliced_path = '../../data/training-data/monthly/spliced/'
+hist_path = '../../data/training-data/monthly/hist/'
 spliced = glob.glob(spliced_path+region.lower()+'/*')
 hist = glob.glob(hist_path+region.lower()+'/*')
 
@@ -310,6 +379,11 @@ ranked_warming_indices = [model_names_spliced_old.index(name) for name in models
 splice_X_array = [splice_X[i] for i in ranked_warming_indices]
 splice_Y_array = [splice_Y[i] for i in ranked_warming_indices]
 model_names_spliced = [model_names_spliced_old[i] for i in ranked_warming_indices]
+
+# Sensitivity test: reviewer-suggested North Pole padding
+if PADDING == 'pole':
+    splice_X_array = [add_north_pole_row(x) for x in splice_X_array]
+    hist_X = [add_north_pole_row(x) for x in hist_X]
 
 # Sensitivity test: apply the same geometry weighting to model input maps
 splice_X_array = [apply_geometry_weighting(x, lats_arctic, GEOMETRY_WEIGHTING) for x in splice_X_array]
@@ -364,7 +438,7 @@ output_dir = f'./preds_and_vals/{months[MONTH_IDX].lower()}_{region.lower()}/'
 os.makedirs(output_dir, exist_ok=True)
 
 # Build and compile the model once
-model = create_CNN(input_shape=(len(lats_arctic), 144, 2 if SAT_SLP else 1))
+model = create_CNN(input_shape=(len(lats_arctic), 144, 2 if SAT_SLP else 1), lon_padding=LON_PADDING or 'zero')
 model.compile(loss='mse', optimizer=optimizers.Adam(learning_rate=1e-4))
 
 with tf.device('/CPU:0'):
@@ -458,7 +532,11 @@ with tf.device('/CPU:0'):
         cv_mse.append(mse_of_cv)
 
 # Save cross validation predicted values
-tag = f'_{GEOMETRY_WEIGHTING}' if GEOMETRY_WEIGHTING else ''
+tag = (
+    (f'_{GEOMETRY_WEIGHTING}' if GEOMETRY_WEIGHTING else '')
+    + (f'_{PADDING}' if PADDING else '')
+    + (f'_{LON_PADDING}' if LON_PADDING else '')
+)
 for i in range(len(model_names_spliced)):
     np.save(output_dir+region.lower()+'_'+str(model_names_spliced[i])+tag+'.npy', np.array(cv_preds_and_vals[i]))
 
@@ -489,7 +567,12 @@ new_errors_all = np.concatenate(new_errors)
 new_errors_sum = np.nansum(new_errors_all, 0)
 new_errors_std = np.sqrt(new_errors_sum/8)
 
-title_tag = f' ({months[MONTH_IDX]}' + (f', {GEOMETRY_WEIGHTING} weighting)' if GEOMETRY_WEIGHTING else ')')
+title_extras = ', '.join(
+    ([f'{GEOMETRY_WEIGHTING} weighting'] if GEOMETRY_WEIGHTING else [])
+    + ([f'{PADDING} padding'] if PADDING else [])
+    + ([f'{LON_PADDING} lon padding'] if LON_PADDING else [])
+)
+title_tag = f' ({months[MONTH_IDX]}' + (f', {title_extras})' if title_extras else ')')
 
 for i in range(3):
     axs[0].text(0.03, 0.9, f'{region}{title_tag}', fontsize=12, transform=axs[0].transAxes, va='top', ha='left')
@@ -552,7 +635,7 @@ for i in range(3):
 
 axs[2].legend(loc='upper left', bbox_to_anchor=(1, 1), frameon=False, fontsize=11)
 os.makedirs('./figures', exist_ok=True)
-plt.savefig('./figures/'+region+'_'+months[MONTH_IDX]+('_'+GEOMETRY_WEIGHTING if GEOMETRY_WEIGHTING else '')+'.png', dpi=300)
+plt.savefig('./figures/'+region+'_'+months[MONTH_IDX]+tag+'.png', dpi=300)
 plt.show()
 
 # Geometry-weighting sensitivity comparison
@@ -566,3 +649,27 @@ plt.show()
 # 2. Once the jobs you want to compare have finished, run the standalone
 #    comparison script (no TensorFlow / training machinery required):
 #      python compare_geometry.py --month april
+
+# North Pole padding sensitivity comparison
+# To reproduce the reviewer-suggested pole-padding test:
+# 1. Run this script once with padding=none (baseline, same as above) and once
+#    with padding=pole for the same month, e.g.:
+#      qsub -v MONTH=april,PADDING=none submit_cnn_7090.sh   (baseline)
+#      qsub -v MONTH=april,PADDING=pole submit_cnn_7090.sh
+#    The pole run is saved with a `_pole` filename tag so it doesn't overwrite
+#    the baseline.
+# 2. Once both jobs have finished, run:
+#      python compare_padding.py --month april
+
+# Periodic (W/E boundary) padding sensitivity comparison
+# To reproduce the co-author-suggested periodic-padding test:
+# 1. Run this script once with lon-padding=zero (baseline, same as above) and
+#    once with lon-padding=periodic for the same month, e.g.:
+#      qsub -v MONTH=april,LON_PADDING=zero submit_cnn_7090.sh       (baseline)
+#      qsub -v MONTH=april,LON_PADDING=periodic submit_cnn_7090.sh
+#    The periodic run is saved with a `_periodic` filename tag so it doesn't
+#    overwrite the baseline. Unlike the geometry/pole tests, this one changes
+#    the CNN's conv-layer boundary handling rather than the input data, but the
+#    model's overall input/output dimensions are unchanged either way.
+# 2. Once both jobs have finished, run:
+#      python compare_lon_padding.py --month april
